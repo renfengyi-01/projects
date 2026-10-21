@@ -1,0 +1,3 @@
+# xAgent 运行时依赖
+requests>=2.31.0     # 大模型 API 流式调用
+textual>=0.60        # Textual TUI 界面
