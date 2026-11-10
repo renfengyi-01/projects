@@ -40,3 +40,9 @@ data/
 *.json
 !package.json
 !tsconfig.json
+
+# Python build artifacts
+*.egg-info/
+build/
+dist/
+
