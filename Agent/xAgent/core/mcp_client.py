@@ -17,6 +17,19 @@ from typing import Any
 from .tools.base import BaseTool, ToolRegistry
 
 
+def _tool_input_schema(tool: Any) -> dict:
+    """读取外部 MCP 工具的入参 schema。
+
+    mcp SDK 2.x 的 Tool 用 snake_case 的 ``input_schema``；1.x 与旧文档用
+    ``inputSchema``。两种都兼容，取不到时返回空对象 schema，避免整次连接失败。
+    """
+    for attr in ("input_schema", "inputSchema"):
+        schema = getattr(tool, attr, None)
+        if isinstance(schema, dict):
+            return schema
+    return {"type": "object", "properties": {}}
+
+
 class _ExternalMcpTool(BaseTool):
     """把一个外部 MCP 工具包装成本地 BaseTool。"""
 
@@ -68,7 +81,9 @@ class McpClientBridge:
                         self, name,
                         t.get("name", "unknown"),
                         t.get("description", ""),
-                        t.get("inputSchema") or t.get("parameters") or {"type": "object", "properties": {}},
+                        t.get("input_schema") or t.get("inputSchema")
+                        or t.get("parameters")
+                        or {"type": "object", "properties": {}},
                     )
                     registry.register(wrapper)
                 self.status[name] = f"connected ({len(tools)} tools)"
@@ -99,7 +114,7 @@ class McpClientBridge:
                     listed = await session.list_tools()
                     return [
                         {"name": t.name, "description": t.description or "",
-                         "inputSchema": t.inputSchema}
+                         "input_schema": _tool_input_schema(t)}
                         for t in listed.tools
                     ]
         return asyncio.run(_go())
@@ -120,7 +135,7 @@ class McpClientBridge:
                     listed = await session.list_tools()
                     return [
                         {"name": t.name, "description": t.description or "",
-                         "inputSchema": t.inputSchema}
+                         "input_schema": _tool_input_schema(t)}
                         for t in listed.tools
                     ]
         return asyncio.run(_go())
