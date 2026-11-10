@@ -1,3 +1,7 @@
 # xAgent 运行时依赖
-requests>=2.31.0     # 大模型 API 流式调用
+requests>=2.31.0     # 大模型 API 流式调用 + 网页抓取 + 搜索
 textual>=0.60        # Textual TUI 界面
+
+# 可选：MCP 客户端接入外部 MCP server（stdio / http）。
+# 不装也能跑，只是不会加载 XAGENT_MCP_SERVERS 配置的外部工具。
+mcp>=2.0.0

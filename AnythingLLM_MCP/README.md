@@ -1,35 +1,39 @@
 # AnythingLLM MCP Server
 
-基于 MCP 协议 2026-07-28 的最小 MCP Server，通过 Streamable HTTP 传输访问本机 AnythingLLM。
+基于 MCP 协议 2026-07-28 的 MCP Server，通过 Streamable HTTP 传输访问本机 AnythingLLM。
 
-提供一个工具 `ask_first_workspace(question)`：向 AnythingLLM 第一个工作区提问，返回 AI 回答。
+## 工具清单（3 类能力）
 
-## 依赖安装
+| 工具 | 类别 | 作用 |
+|---|---|---|
+| `ask_first_workspace(question)` | 对话问答 | 向第一个工作区提问，返回 AI 回答 |
+| `list_workspace_files()` | 工作区管理 | 列出所有工作区及其文档 |
+| `upload_document(file_path)` | 文档管理 | 上传本地文件到 AnythingLLM 文档库 |
+| `add_document_to_workspace(doc_location, workspace_slug?)` | 文档向量化 | 把已上传文档加入工作区并触发 embedding |
 
+## 配置（不硬编码）
+
+复制 `.env.example` 为 `.env`，或直接设置环境变量：
+
+```powershell
+$env:ANYTHINGLLM_BASE_URL = "http://localhost:3001/api"
+$env:ANYTHINGLLM_API_KEY  = "你的真实Key"
 ```
-pip install -r requirements.txt
-```
+
+未设置 `ANYTHINGLLM_API_KEY` 时，程序启动即报错退出。
 
 ## 启动 / 停止
 
-启动：
-
-```
+```powershell
+pip install -r requirements.txt
 python server.py
 ```
 
-服务监听 `http://127.0.0.1:8000/mcp`。
-
-停止：在运行窗口按 `Ctrl+C`；若是后台进程，按端口杀进程：
-
-```
-netstat -ano | findstr :8000
-taskkill /PID <进程号> /F
-```
+MCP 端点：`http://127.0.0.1:8000/mcp`（Streamable HTTP）。
 
 ## 项目级 MCP 配置
 
-`.trae/mcp.json` 为受保护文件，需在 IDE 中手动添加：
+`.trae/mcp.json` 需手动添加：
 
 ```json
 {
@@ -44,13 +48,8 @@ taskkill /PID <进程号> /F
 
 ## 验证
 
-```
+```powershell
 python test_client.py
 ```
 
-预期输出：协议版本 `2026-07-28`、工具列表含 `ask_first_workspace`、以及 AnythingLLM 的回答。
-
-## 说明
-
-- AnythingLLM 地址：`http://localhost:3001/api`，API Key 硬编码在 [server.py](server.py) 中。
-- 2026-07-28 协议使用 `server/discover` 握手（非传统 `initialize`）。
+预期输出：协议版本 `2026-07-28`、工具列表含上述 4 个工具、以及 AnythingLLM 的回答。
